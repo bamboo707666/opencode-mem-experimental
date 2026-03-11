@@ -11,6 +11,7 @@ export interface ProviderConfig {
   apiKey?: string;
   maxIterations?: number;
   iterationTimeout?: number;
+  maxTokens?: number;
   memoryTemperature?: number | false;
 }
 
