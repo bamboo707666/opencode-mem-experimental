@@ -238,12 +238,30 @@ const CONFIG_TEMPLATE = `{
   // Automatically detect and remove duplicate memories
   "deduplicationEnabled": true,
   
-  // Similarity threshold (0-1) for detecting duplicates (higher = stricter)
-  "deduplicationSimilarityThreshold": 0.90,
-  
-  // ============================================
-  // Auto-Capture Settings (REQUIRES EXTERNAL API)
-  // ============================================
+   // Similarity threshold (0-1) for detecting duplicates (higher = stricter)
+   "deduplicationSimilarityThreshold": 0.90,
+   
+   // ============================================
+   // OpenCode Provider Settings (RECOMMENDED)
+   // ============================================
+
+   // Use opencode's already-configured providers for auto-capture and user profile learning.
+   // When set, no separate API key is needed — uses your existing opencode authentication
+   // (including Claude Pro/Max plans via OAuth, or any API key configured in opencode).
+   //
+   // If NOT set, falls back to the manual config (memoryApiKey/memoryApiUrl/memoryModel below).
+   //
+   // Examples:
+   //   Anthropic (OAuth/API key): "opencodeProvider": "anthropic", "opencodeModel": "claude-haiku-4-5-20251001"
+   //   OpenAI (API key):          "opencodeProvider": "openai",     "opencodeModel": "gpt-4o-mini"
+   //
+   // The provider name must match a connected provider in opencode (check with: opencode providers list)
+   // "opencodeProvider": "anthropic",
+   // "opencodeModel": "claude-haiku-4-5-20251001",
+
+   // ============================================
+   // Auto-Capture Settings (REQUIRES EXTERNAL API)
+   // ============================================
   
   // IMPORTANT: Auto-capture ONLY works with external API
   // It runs in background without blocking your main session

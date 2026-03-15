@@ -1,0 +1,13 @@
+45:  opencodeProvider?: string;
+46:  opencodeModel?: string;
+90:    | "opencodeProvider"
+91:    | "opencodeModel"
+105:  opencodeProvider?: string;
+106:  opencodeModel?: string;
+245:   // OpenCode Provider Settings (RECOMMENDED)
+255:   //   Anthropic (OAuth/API key): "opencodeProvider": "anthropic", "opencodeModel": "claude-haiku-4-5-20251001"
+256:   //   OpenAI (API key):          "opencodeProvider": "openai",     "opencodeModel": "gpt-4o-mini"
+259:   // "opencodeProvider": "anthropic",
+260:   // "opencodeModel": "claude-haiku-4-5-20251001",
+486:  opencodeProvider: fileConfig.opencodeProvider,
+487:  opencodeModel: fileConfig.opencodeModel,
