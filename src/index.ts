@@ -15,6 +15,7 @@ import { isConfigured, CONFIG } from "./config.js";
 import { log } from "./services/logger.js";
 import type { MemoryType } from "./types/index.js";
 import { getLanguageName } from "./services/language-detector.js";
+import { setStatePath, setConnectedProviders } from "./services/ai/opencode-provider.js";
 
 export const OpenCodeMemPlugin: Plugin = async (ctx: PluginInput) => {
   const { directory } = ctx;
@@ -35,6 +36,23 @@ export const OpenCodeMemPlugin: Plugin = async (ctx: PluginInput) => {
       log("Plugin warmup failed", { error: String(error) });
     }
   }
+
+  // Wire opencode state path and provider list — fire-and-forget to avoid blocking init
+  // These calls can hang if opencode isn't fully bootstrapped yet
+  (async () => {
+    try {
+      const pathResult = await ctx.client.path.get();
+      if (pathResult.data?.state) {
+        setStatePath(pathResult.data.state);
+      }
+      const providerResult = await ctx.client.provider.list();
+      if (providerResult.data?.connected) {
+        setConnectedProviders(providerResult.data.connected);
+      }
+    } catch (error) {
+      log("Failed to initialize opencode provider state", { error: String(error) });
+    }
+  })();
 
   if (CONFIG.webServerEnabled) {
     startWebServer({
