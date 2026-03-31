@@ -388,7 +388,7 @@ export const OpenCodeMemPlugin: Plugin = async (ctx: PluginInput) => {
     event: async (input: { event: { type: string; properties?: any } }) => {
       const event = input.event;
       if (event.type === "session.idle") {
-        if (!isConfigured()) return;
+        if (!isConfigured() || !CONFIG.autoCaptureEnabled) return;
         const sessionID = event.properties?.sessionID;
         if (!sessionID) return;
 
