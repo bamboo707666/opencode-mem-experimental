@@ -15,7 +15,6 @@ import { isConfigured, CONFIG, initConfig } from "./config.js";
 import { log } from "./services/logger.js";
 import type { MemoryType } from "./types/index.js";
 import { getLanguageName } from "./services/language-detector.js";
-import { setStatePath, setConnectedProviders } from "./services/ai/opencode-provider.js";
 
 export const OpenCodeMemPlugin: Plugin = async (ctx: PluginInput) => {
   const { directory } = ctx;
@@ -42,6 +41,8 @@ export const OpenCodeMemPlugin: Plugin = async (ctx: PluginInput) => {
   // These calls can hang if opencode isn't fully bootstrapped yet
   (async () => {
     try {
+      const { setStatePath, setConnectedProviders } =
+        await import("./services/ai/opencode-provider.js");
       const pathResult = await ctx.client.path.get();
       if (pathResult.data?.state) {
         setStatePath(pathResult.data.state);
