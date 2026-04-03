@@ -1,15 +1,25 @@
-import { pipeline, env } from "@xenova/transformers";
 import { CONFIG } from "../config.js";
 import { log } from "./logger.js";
 import { join } from "node:path";
 
-env.allowLocalModels = true;
-env.allowRemoteModels = true;
-env.cacheDir = join(CONFIG.storagePath, ".cache");
-
 const TIMEOUT_MS = 30000;
 const GLOBAL_EMBEDDING_KEY = Symbol.for("opencode-mem.embedding.instance");
 const MAX_CACHE_SIZE = 100;
+
+let _transformers: {
+  pipeline: (typeof import("@xenova/transformers"))["pipeline"];
+  env: (typeof import("@xenova/transformers"))["env"];
+} | null = null;
+
+async function ensureTransformersLoaded(): Promise<NonNullable<typeof _transformers>> {
+  if (_transformers !== null) return _transformers;
+  const mod = await import("@xenova/transformers");
+  mod.env.allowLocalModels = true;
+  mod.env.allowRemoteModels = true;
+  mod.env.cacheDir = join(CONFIG.storagePath, ".cache");
+  _transformers = mod;
+  return _transformers!;
+}
 
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return Promise.race([
@@ -45,6 +55,7 @@ export class EmbeddingService {
         this.isWarmedUp = true;
         return;
       }
+      const { pipeline } = await ensureTransformersLoaded();
       this.pipe = await pipeline("feature-extraction", CONFIG.embeddingModel, {
         progress_callback: progressCallback,
       });
