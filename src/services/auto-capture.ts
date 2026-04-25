@@ -4,6 +4,7 @@ import { getTags } from "./tags.js";
 import { log } from "./logger.js";
 import { CONFIG } from "../config.js";
 import { userPromptManager } from "./user-prompt/user-prompt-manager.js";
+import type { MemoryClass } from "../types/index.js";
 
 interface ToolCallInfo {
   name: string;
@@ -66,6 +67,7 @@ export async function performAutoCapture(
     const latestMemory = await getLatestProjectMemory(tags.project.tag);
 
     const context = buildMarkdownContext(prompt.content, textResponses, toolCalls, latestMemory);
+    const classification = classifyMemoryClass(prompt.content, textResponses, toolCalls);
 
     const summaryResult = await generateSummary(context, sessionID, prompt.content);
 
@@ -77,6 +79,7 @@ export async function performAutoCapture(
     const result = await memoryClient.addMemory(summaryResult.summary, tags.project.tag, {
       source: "auto-capture" as any,
       type: summaryResult.type as any,
+      class: classification.class as any,
       tags: summaryResult.tags,
       sessionID,
       promptId: prompt.id,
@@ -386,4 +389,57 @@ Analyze this conversation. If it contains technical work (code, bugs, features, 
     type: result.data.type,
     tags: (result.data.tags || []).map((t: string) => t.toLowerCase().trim()),
   };
+}
+
+function classifyMemoryClass(
+  userPrompt: string,
+  textResponses: string[],
+  toolCalls: ToolCallInfo[]
+): { class: MemoryClass | undefined; confidence: number } {
+  const text = [userPrompt, ...textResponses].join("\n").toLowerCase();
+
+  const handoffPatterns = [
+    /checkpoint\s*summary/i,
+    /fresh\s*session\s*recommended/i,
+    /pre-?hang\s*handoff/i,
+    /next\s*smallest\s*unfinished\s*step/i,
+    /recommended\s*source\s*for\s*resume/i,
+    /resume\s*source\s*of\s*truth/i,
+  ];
+  const handoffScore = handoffPatterns.filter((p) => p.test(text)).length;
+
+  const postmortemPatterns = [
+    /root\s*cause/i,
+    /validated\s*by/i,
+    /where\s*it\'?s\s*broken/i,
+    /this\s*was\s*caused\s*by/i,
+  ];
+  const postmortemScore = postmortemPatterns.filter((p) => p.test(text)).length;
+
+  const prefPatterns = [
+    /prefer/i,
+    /do\s*not\b/i,
+    /always\b.*(?:do|use|open|write|call)/i,
+    /before\s*doing\s*anything\s*else/i,
+    /open\s+but\s+do\s+not\s+modify/i,
+    /show\s+unified\s+diffs/i,
+    /do\s*not\s*apply\s+edits\s+until/i,
+  ];
+  const prefScore = prefPatterns.filter((p) => p.test(text)).length;
+
+  const scores = {
+    handoff: handoffScore,
+    postmortem: postmortemScore,
+    operational_preference: prefScore,
+  };
+  const maxScore = Math.max(handoffScore, postmortemScore, prefScore);
+
+  if (maxScore === 0) {
+    return { class: undefined, confidence: 0 };
+  }
+
+  const bestClass = Object.entries(scores).find(([_, score]) => score === maxScore)![0];
+  const confidence = maxScore / 3;
+
+  return { class: bestClass as MemoryClass, confidence };
 }

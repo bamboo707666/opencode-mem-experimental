@@ -18,3 +18,10 @@ export interface MemoryMetadata {
 }
 
 export type AIProviderType = "openai-chat" | "openai-responses" | "anthropic";
+
+export type MemoryClass = "handoff" | "postmortem" | "operational_preference";
+export const MEMORY_CLASSES: MemoryClass[] = ["handoff", "postmortem", "operational_preference"];
+
+export interface MemoryClassMetadata {
+  class?: MemoryClass;
+}
