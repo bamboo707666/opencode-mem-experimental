@@ -62,7 +62,5 @@
     "dist",
     "package.json"
   ],
-  "scripts": {
-    "postinstall": "bun add @huggingface/transformers@4.0.1 --exact && cp -R node_modules/@huggingface/transformers/src node_modules/@huggingface/transformers/dist 2>/dev/null || true"
-  }
+  "scripts": {}
 }
