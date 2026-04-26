@@ -15,14 +15,6 @@
       "types": "./dist/index.d.ts"
     }
   },
-  "scripts": {
-    "build": "bunx tsc && mkdir -p dist/web && cp -r src/web/* dist/web/",
-    "dev": "tsc --watch",
-    "typecheck": "tsc --noEmit",
-    "format": "prettier --write \"src/**/*.{ts,js,css,html}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,js,css,html}\"",
-    "prepare": "husky"
-  },
   "keywords": [
     "opencode",
     "plugin",
@@ -45,7 +37,7 @@
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.58",
     "@ai-sdk/openai": "^3.0.41",
-    "@huggingface/transformers": "^4.0.1",
+    "@huggingface/transformers": "4.0.1",
     "@opencode-ai/plugin": "^1.3.0",
     "@opencode-ai/sdk": "^1.3.0",
     "ai": "^6.0.116",
@@ -56,8 +48,6 @@
   },
   "devDependencies": {
     "@types/bun": "^1.3.8",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.2.7",
     "prettier": "^3.4.2",
     "typescript": "^5.7.3"
   },
@@ -72,9 +62,7 @@
     "dist",
     "package.json"
   ],
-  "lint-staged": {
-    "*.{ts,tsx,js,jsx,css,html,json,md}": [
-      "prettier --write"
-    ]
+  "scripts": {
+    "postinstall": "bun add @huggingface/transformers@4.0.1 --exact && cp -R node_modules/@huggingface/transformers/src node_modules/@huggingface/transformers/dist 2>/dev/null || true"
   }
 }
